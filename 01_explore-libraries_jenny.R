@@ -70,4 +70,4 @@ ipt2 %>%
   count(github) %>%
   mutate(prop = n / sum(n))
 
-devtools::session_info()
+devtools::session_info(loadedOnly = TRUE)
