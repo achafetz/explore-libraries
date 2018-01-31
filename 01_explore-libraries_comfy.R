@@ -1,68 +1,70 @@
-#' Which libraries does R search for pkgsages?
+## First attempt: Just get it to work ----
 
-# try .libPaths(), .Library
+list.files("~/Desktop/day1_s1_explore-libraries")
 
-.libPaths()
+list.files("~/Desktop/day1_s1_explore-libraries", pattern = "\\.R$")
 
-#' Installed pkgsages
+list.files(
+    "~/Desktop/day1_s1_explore-libraries",
+    pattern = "\\.R$",
+    full.names = TRUE
+)
 
-## use installed.pkgsages() to get all installed pkgsages
-## if you like working with data frame or tibble, make it so right away!
-## remember to use View() or similar to inspect
+from_files <- list.files(
+    "~/Desktop/day1_s1_explore-libraries",
+    pattern = "\\.R$",
+    full.names = TRUE
+)
 
-pkgs <- installed.pkgsages() %>% as.tibble()
+(to_files <- basename(from_files))
 
-## how many pkgsages?
+file.copy(from_files, to_files)
 
-nrow(pkgs)
+list.files()
 
-#' Exploring the pkgsages
+## Clean it out, so we can refine ----
+file.remove(to_files)
+list.files()
 
-## count some things! inspiration
-##   * tabulate by LibPath, Priority, or both
-##   * what proportion need compilation?
-##   * how break down re: version of R they were built on
+## Copy again, tighter code ----
+from_dir <- file.path("~", "Desktop", "day1_s1_explore-libraries")
+from_files <- list.files(from_dir, pattern = "\\.R$", full.names = TRUE)
+to_files <- basename(from_files)
+file.copy(from_files, to_files)
+list.files()
 
-## for tidyverts, here are some useful patterns
-# data %>% count(var)
-# data %>% count(var1, var2)
-# data %>% count(var) %>% mutate(prop = n / sum(n))
+## Clean it out, so we can use fs ----
+file.remove(to_files)
+list.files()
 
+## Copy again, using fs ----
+library(fs)
+(from_dir <- path_home("Desktop", "day1_s1_explore-libraries"))
+(from_files <- dir_ls(from_dir, glob = "*.R"))
+(to_files <- path_file(from_files))
+(out <- file_copy(from_files, to_files))
+dir_ls()
+dir_info()
 
-glimpse(pkgs)
-pkgs %>% distinct(Priority)
+## Sidebar: Why does Jenny name files this way? ----
+library(tidyverse)
+ft <- tibble(files = dir_ls(glob = "*.R"))
+ft
 
-pkgs %>% count(Priority)
-pkgs %>% count(Priority, Built)
-pkgs %>% count(Priority) %>% mutate(prop = n/sum(n))
+ft %>%
+    filter(str_detect(files, "explore"))
 
-pkgs %>% count(Priority, Suggests) %>% print(n = Inf)
+ft %>%
+    mutate(files = path_ext_remove(files)) %>%
+    separate(files, into = c("i", "topic", "flavor"), sep = "_")
 
-pkgs %>% 
-    select(Priority, pkgsage) %>% 
-    arrange(Priority) %>% 
-    print(n = Inf)
+dirs <- dir_ls(path_home("Desktop"), type = "directory")
+(dt <- tibble(dirs = path_file(dirs)))
+dt %>%
+    separate(dirs, into = c("day", "session", "topic"), sep = "_")
 
-pkgs %>% 
-    mutate(addtl_needs = ifelse(is.na(Suggests), 0, str_count(Suggests, ",") + 1)) %>% 
-    count(Priority, addtl_needs)
-           
-           
-           
-           
-           
+## Principled use of delimiters --> meta-data can be recovered from filename
 
-#' Reflections
-
-## reflect on ^^ and make a few notes to yourself; inspiration
-##   * does the number of base + recommended pkgsages make sense to you?
-##   * how does the result of .libPaths() relate to the result of .Library?
-
-
-#' Going further
-
-## if you have time to do more ...
-
-## is every pkgsage in .Library either base or recommended?
-## study pkgsage naming style (all lower case, contains '.', etc
-## use `fields` argument to installed.pkgsages() to get more info and use it!
+## Clean it out, so we reset for workshop ----
+file_delete(to_files)
+dir_ls()
