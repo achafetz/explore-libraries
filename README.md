@@ -12,4 +12,4 @@ Let's look at a file in Rmd.
 
 I had cofee.
 
-Wingardium Leviosaaaaa
+Wingardium Leviosa.
