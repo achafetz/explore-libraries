@@ -3,8 +3,7 @@
 #' ---
 
 #libraries
-library(fs)
-library(tidyverse)
+pacman::p_load(fs, tidyverse)
 
 ## how jenny might do this in a first exploration
 ## purposely leaving a few things to change later!
